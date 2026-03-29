@@ -4,3 +4,6 @@ import apiClient from "./apiClient";
 export const generateRecommendations = (payload) =>
   apiClient.post("/api/recommendations", payload);
 
+export const trackOpportunityAction = (payload) =>
+  apiClient.post("/api/activity/opportunity-action", payload);
+

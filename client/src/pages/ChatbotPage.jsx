@@ -4,12 +4,17 @@ import { useMode } from "../context/useMode";
 import { getModeResponse } from "../utils/modeResponse";
 import { fetchFreeAiAdvice } from "../services/aiAdvisorApi";
 import { useLanguage } from "../context/useLanguage";
+import { addMomentum, recordCounter } from "../utils/userActivity";
+import { generateRecommendations, trackOpportunityAction } from "../services/recommendationApi";
 
 const serviceTracks = [
   "Internship",
   "Scholarship",
   "Career Guidance",
   "Guidance In Any Task",
+  "Fellowships",
+  "Hackathons",
+  "Freelance / Part-time",
 ];
 
 const yearOptions = ["1st Year", "2nd Year", "3rd Year", "4th Year", "Graduate"];
@@ -45,6 +50,27 @@ const secondaryOptionsByTrack = {
     "Time Management",
     "Productivity Planning",
   ],
+  Fellowships: [
+    "Research Fellowships",
+    "Public Policy Fellowships",
+    "International Fellowships",
+    "Social Impact Fellowships",
+    "Startup Fellowships",
+  ],
+  Hackathons: [
+    "Beginner Friendly",
+    "Web/Software",
+    "AI/ML",
+    "Blockchain",
+    "Open Innovation",
+  ],
+  "Freelance / Part-time": [
+    "Web Development",
+    "Design",
+    "Content Writing",
+    "Data Analysis",
+    "Virtual Assistance",
+  ],
 };
 
 const timeOptionsByTrack = {
@@ -52,6 +78,9 @@ const timeOptionsByTrack = {
   Scholarship: ["This Month", "Next 3 Months", "This Year", "Any Time"],
   "Career Guidance": ["Today", "This Week", "This Month", "Long Term"],
   "Guidance In Any Task": ["Urgent", "2-3 Days", "This Week", "Flexible"],
+  Fellowships: ["This Month", "Next 3 Months", "This Year", "Flexible"],
+  Hackathons: ["This Week", "This Month", "This Quarter", "Flexible"],
+  "Freelance / Part-time": ["Immediate", "This Week", "This Month", "Flexible"],
 };
 
 const recommendationMap = {
@@ -183,6 +212,55 @@ const recommendationMap = {
       "Protect no-notification deep work",
     ],
   },
+  Fellowships: {
+    "Research Fellowships": ["Summer research programs", "Professor-led labs", "Domain research fellowships"],
+    "Public Policy Fellowships": ["Policy research cohort", "Governance fellowships", "Think tank internships"],
+    "International Fellowships": ["Fulbright", "Chevening", "Erasmus scholarships"],
+    "Social Impact Fellowships": ["NGO fellowships", "Rural impact projects", "Education impact cohorts"],
+    "Startup Fellowships": ["Founder office fellowships", "Early-stage operator fellowship", "Product growth fellowship"],
+  },
+  Hackathons: {
+    "Beginner Friendly": ["Local college hackathons", "Community buildathons", "No-code challenge tracks"],
+    "Web/Software": ["MERN stack challenge", "Cloud app sprint", "Open source challenge"],
+    "AI/ML": ["Applied AI hackathons", "GenAI app challenge", "Data science competitions"],
+    Blockchain: ["Web3 product sprint", "Smart contract challenge", "DeFi innovation track"],
+    "Open Innovation": ["Corporate innovation challenge", "Public problem solving challenge", "Cross-domain challenge"],
+  },
+  "Freelance / Part-time": {
+    "Web Development": ["Portfolio website gigs", "Landing page projects", "Maintenance retainers"],
+    Design: ["UI redesign projects", "Brand kit work", "Social creatives"],
+    "Content Writing": ["Tech blog writing", "SEO content projects", "Newsletter writing"],
+    "Data Analysis": ["Dashboard setup gigs", "Data cleanup projects", "Reporting automation"],
+    "Virtual Assistance": ["Operations support", "Client coordination", "Documentation tasks"],
+  },
+};
+
+const resourceLinksByTrack = {
+  Internship: [
+    { name: "Internshala", url: "https://internshala.com" },
+    { name: "LinkedIn Jobs", url: "https://www.linkedin.com/jobs" },
+    { name: "Wellfound", url: "https://wellfound.com/jobs" },
+  ],
+  Scholarship: [
+    { name: "National Scholarship Portal", url: "https://scholarships.gov.in" },
+    { name: "Buddy4Study", url: "https://www.buddy4study.com" },
+    { name: "Scholarships.com", url: "https://www.scholarships.com" },
+  ],
+  Fellowships: [
+    { name: "Chevening", url: "https://www.chevening.org" },
+    { name: "Fulbright", url: "https://foreign.fulbrightonline.org" },
+    { name: "Acumen", url: "https://acumen.org/fellowship" },
+  ],
+  Hackathons: [
+    { name: "Devpost", url: "https://devpost.com/hackathons" },
+    { name: "Unstop", url: "https://unstop.com/hackathons" },
+    { name: "MLH", url: "https://mlh.io" },
+  ],
+  "Freelance / Part-time": [
+    { name: "Upwork", url: "https://www.upwork.com" },
+    { name: "Fiverr", url: "https://www.fiverr.com" },
+    { name: "Freelancer", url: "https://www.freelancer.com" },
+  ],
 };
 
 function ChatbotPage({ title = "Chat Assistant" }) {
@@ -244,6 +322,7 @@ function ChatbotPage({ title = "Chat Assistant" }) {
   const [selectedOption, setSelectedOption] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [recommendationScores, setRecommendationScores] = useState([]);
+  const [opportunities, setOpportunities] = useState([]);
   const [aiAdvice, setAiAdvice] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
 
@@ -396,6 +475,8 @@ function ChatbotPage({ title = "Chat Assistant" }) {
     const info = `${profile.name}, ${profile.age} yrs, ${profile.year}, ${profile.college}`;
     addUserMessage(`Profile submitted: ${info}`);
     setProfileSubmitted(true);
+    recordCounter("bestMatchActions", 1);
+    addMomentum("Saved Best Match profile");
     addBotMessage(
       getModeResponse(
         mode,
@@ -412,7 +493,10 @@ function ChatbotPage({ title = "Chat Assistant" }) {
     setSelectedOption("");
     setSelectedTime("");
     setRecommendationScores([]);
+    setOpportunities([]);
     setAiAdvice("");
+    recordCounter("bestMatchActions", 1);
+    addMomentum(`Selected Best Match category: ${track}`);
     addUserMessage(`Selected: ${track}`);
     addBotMessage(isHindi ? "बहुत बढ़िया। अब अपनी जरूरत के अनुसार सबसे उपयुक्त विकल्प चुनें।" : "Great. Pick the most relevant option for your current need.");
   };
@@ -421,6 +505,7 @@ function ChatbotPage({ title = "Chat Assistant" }) {
     setSelectedOption(option);
     setSelectedTime("");
     setRecommendationScores([]);
+    setOpportunities([]);
     setAiAdvice("");
     addUserMessage(`Preference: ${option}`);
     addBotMessage(isHindi ? "अच्छा चयन। अब टाइमलाइन चुनें।" : "Nice choice. Select your timeline preference.");
@@ -428,6 +513,8 @@ function ChatbotPage({ title = "Chat Assistant" }) {
 
   const handleTimePick = async (timeOption) => {
     setSelectedTime(timeOption);
+    recordCounter("bestMatchActions", 1);
+    addMomentum(`Generated Best Match results for ${selectedTrack}`);
     addUserMessage(isHindi ? `टाइमलाइन: ${timeOption}` : `Timeline: ${timeOption}`);
     addBotMessage(isHindi ? "आपके लिए सबसे उपयुक्त विकल्पों का स्कोर निकाला जा रहा है..." : "Computing your best-fit options with probability scores...");
 
@@ -438,7 +525,27 @@ function ChatbotPage({ title = "Chat Assistant" }) {
       timeOption
     );
 
-    setRecommendationScores(scored);
+    try {
+      const response = await generateRecommendations({
+        track: selectedTrack,
+        selectedOption,
+        timeline: timeOption,
+        profile,
+      });
+
+      const backendOpportunities = response.data?.opportunities || [];
+      setOpportunities(backendOpportunities);
+
+      if (backendOpportunities.length > 0) {
+        setRecommendationScores(
+          backendOpportunities.map((item) => ({ label: item.title, score: item.confidence }))
+        );
+      } else {
+        setRecommendationScores(scored);
+      }
+    } catch {
+      setRecommendationScores(scored);
+    }
 
     setIsAiLoading(true);
     const advice = await fetchFreeAiAdvice({
@@ -453,6 +560,24 @@ function ChatbotPage({ title = "Chat Assistant" }) {
     addBotMessage(isHindi ? "हो गया। आपकी रिकमेंडेशन लिस्ट के नीचे AI सलाह जोड़ दी गई है।" : "Done. I have added AI-enhanced guidance under your recommendation list.");
   };
 
+  const handleOpportunityAction = async (item, action) => {
+    try {
+      await trackOpportunityAction({ key: item.key || item.title, action });
+      recordCounter("bestMatchActions", 1);
+      if (action === "applied") {
+        recordCounter("applicationClicks", 1);
+      }
+      addMomentum(`Opportunity ${action}: ${item.title}`);
+      addBotMessage(
+        isHindi
+          ? `${item.title} को ${action} के रूप में अपडेट किया गया।`
+          : `${item.title} marked as ${action}.`
+      );
+    } catch {
+      addBotMessage(isHindi ? "स्थिति अपडेट नहीं हो सकी।" : "Could not update status right now.");
+    }
+  };
+
   const recommendations =
     recommendationMap[selectedTrack]?.[selectedOption] || [
       "Build a clear weekly action plan",
@@ -460,6 +585,13 @@ function ChatbotPage({ title = "Chat Assistant" }) {
       "Strengthen profile with measurable projects",
       "Take weekly mentor feedback",
     ];
+
+  const resourceLinks = resourceLinksByTrack[selectedTrack] || [];
+
+  const trackResourceClick = (name) => {
+    recordCounter("applicationClicks", 1);
+    addMomentum(`Opened opportunity website: ${name}`);
+  };
 
   return (
     <section className="chat-page">
@@ -638,12 +770,70 @@ function ChatbotPage({ title = "Chat Assistant" }) {
                     </div>
                   )}
 
+                  {!!opportunities.length && (
+                    <div className="opportunity-cards-grid">
+                      {opportunities.map((item) => (
+                        <article key={item.key} className="opportunity-card">
+                          <h4>{item.title}</h4>
+                          <p>
+                            <strong>{isHindi ? "प्रदाता" : "Provider"}:</strong> {item.provider}
+                          </p>
+                          <p>
+                            <strong>{isHindi ? "डेडलाइन" : "Deadline"}:</strong> {item.deadlineHint}
+                          </p>
+                          <p>
+                            <strong>{isHindi ? "कॉन्फिडेंस" : "Confidence"}:</strong> {item.confidence}%
+                          </p>
+                          {!!item.reasons?.length && (
+                            <ul>
+                              {item.reasons.slice(0, 3).map((reason) => (
+                                <li key={reason}>{reason}</li>
+                              ))}
+                            </ul>
+                          )}
+                          {!!item.missingSkills?.length && (
+                            <p>
+                              <strong>{isHindi ? "Missing Skills" : "Missing Skills"}:</strong> {item.missingSkills.join(", ")}
+                            </p>
+                          )}
+                          <div className="opportunity-actions">
+                            <a href={item.url} target="_blank" rel="noreferrer">
+                              {isHindi ? "ओपन करें" : "Open"}
+                            </a>
+                            <button type="button" onClick={() => handleOpportunityAction(item, "saved")}>Save</button>
+                            <button type="button" onClick={() => handleOpportunityAction(item, "applied")}>Applied</button>
+                            <button type="button" onClick={() => handleOpportunityAction(item, "rejected")}>Reject</button>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+
                   {isAiLoading && <p className="tool-loading">{isHindi ? "AI सलाह बनाई जा रही है..." : "Generating AI-enhanced advice..."}</p>}
 
                   {!!aiAdvice && (
                     <div className="ai-advice-box">
                       <h4>{isHindi ? "AI जनरेटेड मार्गदर्शन" : "AI Generated Guidance"}</h4>
                       <p>{aiAdvice}</p>
+                    </div>
+                  )}
+
+                  {!!resourceLinks.length && (
+                    <div className="resource-links-box">
+                      <h4>{isHindi ? "लोकप्रिय वेबसाइट्स (अप्लाई करें)" : "Popular Websites (Apply)"}</h4>
+                      <div className="resource-link-grid">
+                        {resourceLinks.map((site) => (
+                          <a
+                            key={site.url}
+                            href={site.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => trackResourceClick(site.name)}
+                          >
+                            {site.name}
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

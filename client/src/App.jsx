@@ -5,13 +5,8 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/DashboardPage";
 import HomePage from "./pages/HomePage";
-import FeaturePlaceholderPage from "./pages/FeaturePlaceholderPage";
 import ChatbotPage from "./pages/ChatbotPage";
 import ToolsPage from "./pages/ToolsPage";
-import EmailGeneratorPage from "./pages/EmailGeneratorPage";
-import ToolPlaceholderPage from "./pages/ToolPlaceholderPage";
-import AssignmentHelperPage from "./pages/AssignmentHelperPage";
-import PDFToolsPage from "./pages/PDFToolsPage";
 import RoadmapPage from "./pages/RoadmapPage";
 import SeniorsPage from "./pages/SeniorsPage";
 import ThemeToggle from "./components/ThemeToggle";
@@ -92,74 +87,10 @@ function App() {
             }
           />
           <Route
-            path="/quick-tasks/email-generator"
+            path="/quick-tasks/:toolKey"
             element={
               <PrivateRoute>
-                <EmailGeneratorPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/pdf-tools"
-            element={
-              <PrivateRoute>
-                <PDFToolsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/assignment-helper"
-            element={
-              <PrivateRoute>
-                <AssignmentHelperPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/front-page-generator"
-            element={
-              <PrivateRoute>
-                <ToolPlaceholderPage title="Front Page Generator" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/resume-polisher"
-            element={
-              <PrivateRoute>
-                <ToolPlaceholderPage title="Resume Polisher" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/cover-letter-builder"
-            element={
-              <PrivateRoute>
-                <ToolPlaceholderPage title="Cover Letter Builder" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/linkedin-headline-lab"
-            element={
-              <PrivateRoute>
-                <ToolPlaceholderPage title="LinkedIn Headline Lab" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/interview-question-bank"
-            element={
-              <PrivateRoute>
-                <ToolPlaceholderPage title="Interview Question Bank" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/quick-tasks/study-plan-scheduler"
-            element={
-              <PrivateRoute>
-                <ToolPlaceholderPage title="Study Plan Scheduler" />
+                <ToolsPage />
               </PrivateRoute>
             }
           />

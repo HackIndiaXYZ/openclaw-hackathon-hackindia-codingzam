@@ -1,6 +1,6 @@
 import { useLanguage } from "../context/useLanguage";
 
-function SeniorCard({ senior }) {
+function SeniorCard({ senior, onContactClick, onBookClick }) {
   const { language } = useLanguage();
   const feeLabel = senior.paid ? (language === "hi" ? "पेड" : "Paid") : (language === "hi" ? "फ्री" : "Free");
   const stars = "⭐".repeat(Math.floor(senior.rating));
@@ -41,6 +41,7 @@ function SeniorCard({ senior }) {
           target="_blank" 
           rel="noreferrer"
           className="action-btn contact-btn"
+          onClick={onContactClick}
         >
           {language === "hi" ? "👤 संपर्क" : "👤 Contact"}
         </a>
@@ -49,6 +50,7 @@ function SeniorCard({ senior }) {
           target="_blank" 
           rel="noreferrer"
           className="action-btn book-btn"
+          onClick={onBookClick}
         >
           {language === "hi" ? "📅 कॉल बुक करें" : "📅 Book Call"}
         </a>

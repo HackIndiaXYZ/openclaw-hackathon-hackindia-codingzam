@@ -4,6 +4,7 @@ import { useMode } from "../context/useMode";
 import { getModeResponse } from "../utils/modeResponse";
 import { fetchSeniors, registerAsMentor } from "../services/seniorApi";
 import { useLanguage } from "../context/useLanguage";
+import { recordSeniorClick } from "../utils/userActivity";
 
 const initialSeniors = [
   {
@@ -263,6 +264,10 @@ function SeniorsPage() {
     }
   };
 
+  const trackSeniorClick = (senior) => {
+    recordSeniorClick(String(senior.id), senior.name);
+  };
+
   return (
     <section className="seniors-page">
       <div className="seniors-header">
@@ -379,7 +384,12 @@ function SeniorsPage() {
       <div className="seniors-grid">
         {filteredAndSortedSeniors.length > 0 ? (
           filteredAndSortedSeniors.map((senior) => (
-            <SeniorCard key={senior.id} senior={senior} />
+            <SeniorCard
+              key={senior.id}
+              senior={senior}
+              onContactClick={() => trackSeniorClick(senior)}
+              onBookClick={() => trackSeniorClick(senior)}
+            />
           ))
         ) : (
           <div className="no-results-message">

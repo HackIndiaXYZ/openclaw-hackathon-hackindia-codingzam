@@ -1,7 +1,17 @@
+import { useEffect, useMemo, useState } from "react";
 import FeatureCard from "../components/FeatureCard";
 import { useMode } from "../context/useMode";
 import { getModeResponse } from "../utils/modeResponse";
 import { useLanguage } from "../context/useLanguage";
+import {
+  addTodo,
+  deleteTodo,
+  deriveDashboard,
+  hydrateActivityFromServer,
+  loadActivity,
+  relativeTime,
+  toggleTodo,
+} from "../utils/userActivity";
 
 const features = [
   {
@@ -26,34 +36,24 @@ const features = [
   },
 ];
 
-const dashboardStats = [
-  { label: "Learning Streak", value: "12 Days", note: "+2 from last week" },
-  { label: "Tasks Completed", value: "37", note: "8 done today" },
-  { label: "Mentor Replies", value: "5", note: "2 unread" },
-  { label: "Roadmap Progress", value: "64%", note: "Milestone 4 active" },
-];
-
-const todayFocus = [
-  "Finish one roadmap milestone module",
-  "Review internship shortlist and save top 3",
-  "Send one mentorship query with specific goal",
-  "Update resume with measurable impact bullets",
-  "Practice two interview questions out loud",
-  "Apply to one internship and one scholarship",
-  "Review one senior profile and book one call",
-  "Plan tomorrow's top three priorities",
-];
-
-const momentumFeed = [
-  { title: "Assignment draft generated", time: "45 min ago" },
-  { title: "New senior mentor available", time: "2 hr ago" },
-  { title: "Roadmap checkpoint unlocked", time: "Yesterday" },
-];
-
 function DashboardPage() {
   const { mode } = useMode();
   const { language } = useLanguage();
   const isHindi = language === "hi";
+  const [activity, setActivity] = useState(() => loadActivity());
+  const [newTodo, setNewTodo] = useState("");
+
+  const stats = useMemo(() => deriveDashboard(activity), [activity]);
+
+  useEffect(() => {
+    const sync = () => setActivity(loadActivity());
+    window.addEventListener("activity-updated", sync);
+    hydrateActivityFromServer().then((data) => setActivity(data));
+
+    return () => {
+      window.removeEventListener("activity-updated", sync);
+    };
+  }, []);
   const heroMessage = getModeResponse(
     mode,
     isHindi
@@ -61,6 +61,39 @@ function DashboardPage() {
       : "Build momentum from one place: plan, execute, and track progress.",
     "greet"
   );
+
+  const dashboardStats = [
+    {
+      label: "Learning Streak",
+      value: `${activity.touchedDays.length} Days`,
+      note: activity.touchedDays.length === 0 ? "0 activity days" : "Active days tracked",
+    },
+    {
+      label: "Tasks Completed",
+      value: String(stats.tasksCompleted),
+      note: `${stats.completedTodos} done in Today Focus`,
+    },
+    {
+      label: "Mentor Contacts",
+      value: String(stats.mentorContacts),
+      note: `Clicked on ${stats.mentorContacts} seniors contact`,
+    },
+    {
+      label: "Roadmap Progress",
+      value: `${stats.roadmapProgress}%`,
+      note: stats.roadmapProgress === 0 ? "No roadmap action yet" : "Calculated from roadmap actions",
+    },
+  ];
+
+  const handleAddTodo = (event) => {
+    event.preventDefault();
+    if (!newTodo.trim()) {
+      return;
+    }
+
+    setActivity(addTodo(newTodo));
+    setNewTodo("");
+  };
 
   return (
     <section className="dashboard-page">
@@ -75,7 +108,7 @@ function DashboardPage() {
           <span className="mode-chip">{isHindi ? "मोड" : "Mode"}: {mode}</span>
           <div className="dashboard-score-card">
             <strong>{isHindi ? "फोकस स्कोर" : "Focus Score"}</strong>
-            <p>82 / 100</p>
+            <p>{stats.focusScore} / 100</p>
           </div>
         </div>
       </header>
@@ -93,22 +126,51 @@ function DashboardPage() {
       <div className="dashboard-main-grid">
         <article className="dashboard-panel">
           <h2>{isHindi ? "आज का फोकस" : "Today Focus"}</h2>
+          <form className="focus-add-form" onSubmit={handleAddTodo}>
+            <input
+              value={newTodo}
+              onChange={(event) => setNewTodo(event.target.value)}
+              placeholder={isHindi ? "नया टास्क जोड़ें" : "Add new task"}
+            />
+            <button type="submit">{isHindi ? "जोड़ें" : "Add"}</button>
+          </form>
           <ul className="focus-list">
-            {todayFocus.map((item) => (
-              <li key={item}>{item}</li>
+            {activity.todos.map((item) => (
+              <li key={item.id} className={item.done ? "done" : ""}>
+                <label className="focus-item-main">
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    onChange={() => setActivity(toggleTodo(item.id))}
+                  />
+                  <span>{item.text}</span>
+                </label>
+                <button type="button" className="focus-delete-btn" onClick={() => setActivity(deleteTodo(item.id))}>
+                  {isHindi ? "हटाएं" : "Delete"}
+                </button>
+              </li>
             ))}
+            {activity.todos.length === 0 && (
+              <li className="focus-empty">{isHindi ? "कोई टास्क नहीं, नया जोड़ें।" : "No tasks yet, add one."}</li>
+            )}
           </ul>
         </article>
 
         <article className="dashboard-panel">
           <h2>{isHindi ? "मोमेंटम फीड" : "Momentum Feed"}</h2>
           <ul className="momentum-list">
-            {momentumFeed.map((entry) => (
-              <li key={entry.title}>
+            {activity.momentum.map((entry) => (
+              <li key={entry.id}>
                 <span>{entry.title}</span>
-                <small>{entry.time}</small>
+                <small>{relativeTime(entry.at)}</small>
               </li>
             ))}
+            {activity.momentum.length === 0 && (
+              <li>
+                <span>{isHindi ? "अब तक कोई गतिविधि नहीं" : "No activity yet"}</span>
+                <small>{isHindi ? "0 actions" : "0 actions"}</small>
+              </li>
+            )}
           </ul>
         </article>
       </div>
