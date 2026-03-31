@@ -53,7 +53,7 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use(cors(corsOptions));
+app.use(cors());  // Use default CORS options  removed the corsOptions to allow all origins for simplicity. Adjust as needed for production.
 app.use(helmet());
 app.use(express.json());
 
