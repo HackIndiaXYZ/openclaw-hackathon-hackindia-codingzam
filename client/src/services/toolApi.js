@@ -59,5 +59,21 @@ export const pdfApi = {
     const response = await apiClient.post("/api/tools/pdf/overlay", formData, { responseType: "blob" });
     toBlobDownload(response, "edited.pdf");
   },
+  frontPage: async (file, payload, logoFile = null) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (logoFile) {
+      formData.append("logo", logoFile);
+    }
+    Object.entries(payload || {}).forEach(([key, value]) => {
+      if (key === "customElements") {
+        formData.append(key, JSON.stringify(value || []));
+        return;
+      }
+      formData.append(key, String(value || ""));
+    });
+    const response = await apiClient.post("/api/tools/pdf/front-page", formData, { responseType: "blob" });
+    toBlobDownload(response, "front-page-edited.pdf");
+  },
 };
 

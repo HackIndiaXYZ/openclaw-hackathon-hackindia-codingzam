@@ -3,39 +3,57 @@
 }
 
 :root {
-  --bg-main: #070611;
-  --bg-secondary: #16102e;
-  --text-main: #f6f2ff;
-  --text-muted: #c6bce9;
-  --glass-bg: rgba(18, 14, 36, 0.56);
-  --glass-border: rgba(179, 134, 255, 0.26);
-  --glass-shadow: 0 22px 46px rgba(5, 3, 12, 0.45);
-  --accent: #a96bff;
-  --accent-soft: rgba(169, 107, 255, 0.26);
+  --bg-main: #081021;
+  --bg-secondary: #111c33;
+  --text-main: #f2f7ff;
+  --text-muted: #b8c7df;
+  --glass-bg: rgba(16, 29, 54, 0.56);
+  --glass-border: rgba(112, 164, 255, 0.24);
+  --glass-shadow: 0 22px 46px rgba(4, 12, 28, 0.45);
+  --accent: #2f86ff;
+  --accent-soft: rgba(47, 134, 255, 0.24);
+
+  --tool-surface: linear-gradient(165deg, #112342 0%, #0f1e38 100%);
+  --tool-surface-soft: linear-gradient(180deg, #122646, #0e1d35);
+  --tool-border: #2f4f80;
+  --tool-text: #e8f0ff;
+  --tool-muted: #b7c6de;
+  --tool-input-bg: rgba(11, 23, 46, 0.72);
+  --tool-card-bg: rgba(12, 26, 49, 0.86);
+  --tool-card-border: #32598e;
 }
 
 body {
   margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--text-main);
   background:
-    radial-gradient(circle at 15% 10%, rgba(141, 81, 255, 0.28) 0%, transparent 35%),
-    radial-gradient(circle at 85% 15%, rgba(80, 35, 140, 0.35) 0%, transparent 34%),
-    linear-gradient(160deg, #090714 0%, #0b0918 48%, #06040e 100%);
+    radial-gradient(circle at 15% 10%, rgba(47, 134, 255, 0.2) 0%, transparent 35%),
+    radial-gradient(circle at 85% 15%, rgba(45, 178, 183, 0.2) 0%, transparent 34%),
+    linear-gradient(160deg, #081021 0%, #0b1529 48%, #070d1b 100%);
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body[data-theme="light"] {
-  --bg-main: #f6f4ff;
-  --bg-secondary: #ece7ff;
-  --text-main: #1a1026;
-  --text-muted: #4a3d6b;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(139, 92, 246, 0.32);
-  --glass-shadow: 0 16px 30px rgba(76, 56, 128, 0.22);
-  --accent: #6d2ff6;
-  --accent-soft: rgba(109, 47, 246, 0.22);
+  --bg-main: #f4f8ff;
+  --bg-secondary: #e7effb;
+  --text-main: #0f243f;
+  --text-muted: #4f6786;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(58, 132, 245, 0.26);
+  --glass-shadow: 0 16px 30px rgba(33, 71, 128, 0.18);
+  --accent: #1463de;
+  --accent-soft: rgba(20, 99, 222, 0.16);
+
+  --tool-surface: linear-gradient(165deg, #ffffff 0%, #eef5ff 100%);
+  --tool-surface-soft: linear-gradient(180deg, #ffffff, #f7fbff);
+  --tool-border: #d2e4ff;
+  --tool-text: #0f294d;
+  --tool-muted: #3f5670;
+  --tool-input-bg: #ffffff;
+  --tool-card-bg: #ffffff;
+  --tool-card-border: #d9e8ff;
 }
 
 html {

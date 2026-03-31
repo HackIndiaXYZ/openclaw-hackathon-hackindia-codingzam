@@ -1,6 +1,19 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://openclaw-hackathon-hackindia-codingzam.onrender.com";
+const normalizeBaseUrl = (url) => {
+  if (!url) {
+    return "";
+  }
+
+  return String(url)
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\/api$/, "");
+};
+
+const API_BASE_URL =
+  normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL) ||
+  "https://openclaw-hackathon-hackindia-codingzam.onrender.com";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

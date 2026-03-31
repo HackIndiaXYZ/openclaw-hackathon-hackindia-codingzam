@@ -19,6 +19,7 @@ const {
 	splitPdf,
 	compressPdf,
 	overlayPdfText,
+	editPdfFrontPage,
 } = require("../controllers/toolController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -44,5 +45,14 @@ router.post("/pdf/merge", authMiddleware, upload.array("files", 10), mergePdf);
 router.post("/pdf/split", authMiddleware, upload.single("file"), splitPdf);
 router.post("/pdf/compress", authMiddleware, upload.single("file"), compressPdf);
 router.post("/pdf/overlay", authMiddleware, upload.single("file"), overlayPdfText);
+router.post(
+	"/pdf/front-page",
+	authMiddleware,
+	upload.fields([
+		{ name: "file", maxCount: 1 },
+		{ name: "logo", maxCount: 1 },
+	]),
+	editPdfFrontPage
+);
 
 module.exports = router;
