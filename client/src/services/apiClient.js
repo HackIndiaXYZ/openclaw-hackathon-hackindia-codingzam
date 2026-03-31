@@ -17,7 +17,8 @@ const API_BASE_URL =
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: Number(import.meta.env.VITE_API_TIMEOUT || 15000),
+  // Render cold starts can take longer on free tier; keep timeout user-friendly.
+  timeout: Number(import.meta.env.VITE_API_TIMEOUT || 60000),
 });
 
 // 🔄 Loading State Management
@@ -48,7 +49,7 @@ export const subscribeToGlobalLoading = (listener) => {
   };
 };
 
-// 🔐 Request Interceptor
+// Request Interceptor
 apiClient.interceptors.request.use(
   (config) => {
     startLoading();
