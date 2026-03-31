@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const { URL } = require("url");
 
 const authRoutes = require("./routes/authRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
@@ -11,18 +12,31 @@ const activityRoutes = require("./routes/activityRoutes");
 
 const app = express();
 
-// ✅ ADD YOUR FRONTEND URL HERE (IMPORTANT)
+const defaultAllowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://openclaw-hackathon-hackindia-codingzam-kanchan-kapri.onrender.com",
+];
+
 const allowedOrigins = (
-  process.env.CORS_ORIGIN ||
-  "http://localhost:5173,http://localhost:5174,https://openclaw-hackathon-hackindia-codingzam-kanchan-kapri.onrender.com"
+  process.env.CORS_ORIGIN || defaultAllowedOrigins.join(",")
 )
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const isRenderOrigin = (origin) => {
+  try {
+    const parsedOrigin = new URL(origin);
+    return parsedOrigin.protocol === "https:" && parsedOrigin.hostname.endsWith(".onrender.com");
+  } catch {
+    return false;
+  }
+};
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || isRenderOrigin(origin)) {
       return callback(null, true);
     }
     return callback(new Error("Origin not allowed by CORS"));

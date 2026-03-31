@@ -66,6 +66,12 @@ const signup = async (req, res) => {
       },
     });
   } catch (error) {
+    if (error.message && error.message.includes("JWT_SECRET is missing")) {
+      return res.status(500).json({
+        message: "Server authentication is not configured. Set JWT_SECRET and redeploy.",
+      });
+    }
+
     const isProd = process.env.NODE_ENV === "production";
     return res.status(500).json({
       message: "Signup failed.",
@@ -117,6 +123,12 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
+    if (error.message && error.message.includes("JWT_SECRET is missing")) {
+      return res.status(500).json({
+        message: "Server authentication is not configured. Set JWT_SECRET and redeploy.",
+      });
+    }
+
     const isProd = process.env.NODE_ENV === "production";
     return res.status(500).json({
       message: "Login failed.",
